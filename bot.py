@@ -1,13 +1,14 @@
+# -*- coding: utf-8 -*-
+
 import time
-from selenium import common
-from selenium import webdriver
+from datetime import datetime
+from selenium import common, webdriver
 from selenium.webdriver.firefox.options import Options
-from PIL import Image
 from selenium.webdriver.common.action_chains import ActionChains
+from PIL import Image
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 import threading
-from datetime import datetime
 import ssl
 
 """ Only whole numbers allowed here """
