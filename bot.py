@@ -1,26 +1,43 @@
-# -*- coding: utf-8 -*-
-
 import time
-from datetime import datetime
-from selenium import common, webdriver
+from selenium import common
+from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.common.action_chains import ActionChains
 from PIL import Image
+from selenium.webdriver.common.action_chains import ActionChains
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 import threading
+from datetime import datetime
 import ssl
 
 """ Only whole numbers allowed here """
 number_of_seats = 2
 
-secret_key = "USE KEY FROM PUSHSAVER"
+secret_key = ""
 
 
 if number_of_seats > 4:
     number_of_seats = 4
 elif number_of_seats < 1:
     number_of_seats = 1
+
+
+options = Options()
+options.headless = False
+browser = webdriver.Firefox(options=options)
+time.sleep(0.1)
+window_size = browser.execute_script("""
+        return [window.outerWidth - window.innerWidth + arguments[0],
+          window.outerHeight - window.innerHeight + arguments[1]];
+        """, 1500, 900)
+browser.set_window_size(*window_size)
+browser.set_page_load_timeout(5)
+
+
+class Status:
+
+    def __init__(self):
+        self.running = True
 
     
 def log(msg):
@@ -122,27 +139,17 @@ def parse_second_screenshot():
 
 def click(x, y):
     """clicks on a location"""
-
     action = ActionChains(browser)
     action.move_to_element(browser.find_element_by_tag_name("body"))
-    action.move_by_offset(-954 + x, -494 + y).click().perform()
+    action.move_by_offset(-741+x, -450+y).click().perform()
 
 
-options = Options()
-options.headless = False
-browser = webdriver.Firefox(options=options,
-                            executable_path='geckodriver.exe')
-browser.set_window_size(1920, 1080)
-browser.set_page_load_timeout(5)
-
-if __name__ == "__main__":
-    try:
-        while True:
+def run(browser, options, status):
+        while status.running:
             links = []
 
             for webpage in ["https://www.eventimsports.de/ols/bvb/de/bundesliga/channel/shop/index",
-                            "https://www.eventimsports.de/ols/bvb/de/champions-league/channel/shop/index",
-                            "https://www.eventimsports.de/ols/bvb/de/3liga/channel/shop/index"]:
+                            "https://www.eventimsports.de/ols/bvb/de/champions-league/channel/shop/index"]:
                 try:
                     browser.get(webpage)
                 except common.exceptions.TimeoutException:
@@ -208,5 +215,12 @@ if __name__ == "__main__":
                 else:
                     send_notification("Neues Ticket im Warenkorb!", "Stehplatz", 15, 0)
 
-    except KeyboardInterrupt:
-        log("Goodbye")
+
+if __name__ == "__main__":
+    status = Status()
+    myThread = threading.Thread(target=run, args=(browser, options, status))
+    myThread.start()
+    input("Press Enter to stop")
+    print("stopping")
+    status.running = False
+    input("Press enter to exit")
