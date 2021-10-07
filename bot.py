@@ -13,7 +13,7 @@ import ssl
 """ Only whole numbers allowed here """
 number_of_seats = 2
 
-secret_key = ""
+secret_key = "7fnJQuy7JJY1ocFNK6WH"
 
 
 if number_of_seats > 4:
@@ -154,9 +154,14 @@ def run(browser, options, status):
                     browser.get(webpage)
                 except common.exceptions.TimeoutException:
                     browser.close()
-                    browser = webdriver.Firefox(options=options,
-                                                executable_path='geckodriver.exe')
-                    browser.set_window_size(1920, 1080)
+                    browser = webdriver.Firefox(options=options)
+                    time.sleep(0.1)
+                    window_size = browser.execute_script("""
+                            return [window.outerWidth - window.innerWidth + arguments[0],
+                              window.outerHeight - window.innerHeight + arguments[1]];
+                            """, 1500, 900)
+                    browser.set_window_size(*window_size)
+                    browser.set_page_load_timeout(5)
                     continue
 
                 buttons = browser.find_elements_by_class_name("event-card__button")
