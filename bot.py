@@ -5,11 +5,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from PIL import Image
 from selenium.webdriver.common.action_chains import ActionChains
-from urllib.parse import urlencode
-from urllib.request import Request, urlopen
 import threading
 from datetime import datetime
-import ssl
 import sys
 
 """ Only whole numbers allowed here """
@@ -23,10 +20,6 @@ number_of_seats = 6
 
 # only bundesliga
 links_to_follow = ["https://www.eventimsports.de/ols/bvb/de/bundesliga/channel/shop/index"]
-
-
-
-secret_key = ""
 
 options = Options()
 options.headless = False
@@ -45,38 +38,6 @@ def log(msg):
 
     now = datetime.now()
     print(now.strftime("%H:%M:%S") + " : " + msg)
-
-
-def send_second_notification(title, ticket):
-    """Set a timer for the second notification"""
-
-    time.sleep(15 * 60)
-    send_notification("Die Tickets sind bald nicht mehr reserviert", ticket, 5, 2)
-
-
-def send_notification(title, ticket, ttl, prio):
-    """Send a notification"""
-
-    url = 'https://www.pushsafer.com/api'
-    post_fields = {
-        "k": secret_key,
-        "d": "a",
-        "t": title,
-        "s": 11,
-        "m": ticket,
-        "i": 128,
-        "l": ttl,
-        "p": prio,
-        "g": "8YHIoe55OVnFVKmgSP"
-    }
-
-    request = Request(url, urlencode(post_fields).encode())
-    gcontext = ssl.SSLContext()
-    urlopen(request, context=gcontext).read().decode()
-
-    thread = threading.Thread(target=send_second_notification, args=(title, ticket))
-    thread.daemon = True
-    thread.start()
 
 
 def parse_first_screenshot():
@@ -225,11 +186,6 @@ def run(browser, options, status):
                 continue
 
             log("successfully bought the tickets")
-
-            # if multi_seats:
-            #    send_notification("Neues Ticket im Warenkorb!", "Sitzplatz", 15, 0)
-            # else:
-            #    send_notification("Neues Ticket im Warenkorb!", "Stehplatz", 15, 0)
 
 
 if __name__ == "__main__":
